@@ -192,7 +192,7 @@ void draw(SDL_Rect &rect, int& n)
 
 
 const int M  = 24;
-const int N = 10;
+const int N = 11;
 
 int score_bonus;
 
@@ -217,7 +217,7 @@ Uint32 starttime = 0;
 bool check()
 {
     for(int i=0;i<4;i++)
-        if (a[i].x<0 || a[i].x >N-1 || a[i].y >M) return 0;
+        if (a[i].x<1 || a[i].x >N-1 || a[i].y >M) return 0;
         else if (field[a[i].y][a[i].x]) return 0;
     return 1;
 }
@@ -258,17 +258,17 @@ void drop_and_spawn()
 
         score_bonus = 0;
         int k = M - 1;
-        for (int i = M-1 ; i>0; i--)
+        for (int i = M-1 ; i>1; i--)
         {
             int counte = 0;
-            for (int j = 0; j<N; j++)
+            for (int j = 1; j<N; j++)
             {
                 if (field[i][j]) counte++;
                 field[k][j] = field[i][j];
 
             };
-            if (counte < N)  k--;
-            if (counte == N) score_bonus++;
+            if (counte < N-1)  k--;
+            if (counte == N-1) score_bonus++;
 
 
         };
@@ -503,6 +503,7 @@ int main(int argc, char* argv[])
         while (game_over)
         {
             SDL_RenderClear(renderer);
+            if (score_max < score) {f.open("highscore.txt"); f<<score; f.close();};
             SDL_RenderCopy(renderer, game_end_text_1, NULL, &game_end_rect_1);
             SDL_RenderCopy(renderer, game_end_text_2, NULL, &game_end_rect_2);
             play_again();
