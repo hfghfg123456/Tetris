@@ -1,0 +1,520 @@
+#include <iostream>
+#include <SDL.h>
+#include <time.h>
+#include <SDL_ttf.h>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
+SDL_Window* window = SDL_CreateWindow("GAME KILL TIME. DON'T PLAY!!!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
+SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
+TTF_Font* dlx = NULL;
+TTF_Font* dlx_30 = NULL;
+TTF_Font* dlx_60 = NULL;
+TTF_Font* dlx_80 = NULL;
+
+SDL_Color white = {255,255,255};
+
+int score = 0;
+
+void score_render();
+
+//////////////------MENU-WHEN-OPEN-GAME-----////////////////////
+SDL_Surface* tetris = NULL;
+SDL_Texture* tetris_text = NULL;
+SDL_Rect tetris_rect;
+
+SDL_Surface* wanna_join = NULL;
+SDL_Texture* wanna_join_text = NULL;
+SDL_Rect wanna_join_rect;
+
+SDL_Surface* yes = NULL;
+SDL_Texture* yes_text = NULL;
+SDL_Rect yes_rect;
+
+SDL_Surface* no = NULL;
+SDL_Texture* no_text = NULL;
+SDL_Rect no_rect;
+
+SDL_Surface* highscore = NULL;
+SDL_Texture* highscore_text = NULL;
+SDL_Rect highscore_rect;
+
+SDL_Surface* back_highscore = NULL;
+SDL_Texture* back_highscore_text = NULL;
+SDL_Rect back_highscore_rect;
+
+SDL_Surface* render_highscore = NULL;
+SDL_Texture* render_highscore_text = NULL;
+SDL_Rect render_highscore_rect;
+
+bool play_game = false;
+
+SDL_Event e;
+
+bool start = true;
+bool running = true;
+bool highscore_next = false;
+
+bool mouse_inside = false;
+
+bool playing = false;
+
+int mouse_x, mouse_y;
+
+int score_max;
+
+fstream f;
+
+void menu_start_game()
+{
+
+//    SDL_RenderClear(renderer);
+    tetris = TTF_RenderText_Solid(dlx_80,"Tetris", white);
+    tetris_text = SDL_CreateTextureFromSurface(renderer, tetris);
+    tetris_rect = {70,50,tetris->w,tetris->h};
+
+    yes = TTF_RenderText_Solid(dlx_30, "Play", white);
+    yes_text = SDL_CreateTextureFromSurface(renderer, yes);
+    yes_rect = {250,350,yes->w,yes->h};
+
+    highscore = TTF_RenderText_Solid(dlx_30,"Highscore", white);
+    highscore_text = SDL_CreateTextureFromSurface(renderer, highscore);
+    highscore_rect = {180,450,highscore->w,highscore->h};
+
+    no = TTF_RenderText_Solid(dlx_30, "Exit", white);
+    no_text = SDL_CreateTextureFromSurface(renderer, no);
+    no_rect = {250,550,no->w,no->h};
+
+    back_highscore = TTF_RenderText_Solid(dlx_30,"Back", white);
+    back_highscore_text = SDL_CreateTextureFromSurface(renderer, back_highscore);
+    back_highscore_rect = {250,550,back_highscore->w,back_highscore->h};
+
+    std::string data = std::to_string(score_max);
+    render_highscore = TTF_RenderText_Solid(dlx_30,data.c_str(), white);
+    render_highscore_text = SDL_CreateTextureFromSurface(renderer, render_highscore);
+    render_highscore_rect = {250,200,render_highscore->w,render_highscore->h};
+
+    while (start)
+    {
+        while (running)
+        {
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, tetris_text, NULL, &tetris_rect);
+            SDL_RenderCopy(renderer, yes_text, NULL, &yes_rect);
+            SDL_RenderCopy(renderer, no_text, NULL, &no_rect);
+            SDL_RenderCopy(renderer, highscore_text, NULL, &highscore_rect);
+
+
+            while(SDL_PollEvent(&e) != 0)
+                {
+                    if (e.type == SDL_QUIT) {running = false; start = false;};
+                    if (e.type == SDL_MOUSEMOTION)
+                        {
+                            mouse_x, mouse_y;
+                            SDL_GetMouseState(&mouse_x, &mouse_y);
+                        }
+
+                    if (e.type == SDL_MOUSEBUTTONDOWN)
+                        {
+                            if (mouse_x >= yes_rect.x && mouse_x <= yes_rect.x + yes_rect.w && mouse_y >= yes_rect.y && mouse_y <= yes_rect.y + yes_rect.h) {playing = true; running = false; start = false;}
+                            if (mouse_x >= no_rect.x && mouse_x <= no_rect.x + no_rect.w && mouse_y >= no_rect.y && mouse_y <= no_rect.y + no_rect.h) {running = false; start = false;}
+                            if (mouse_x >= highscore_rect.x && mouse_x <= highscore_rect.x + highscore_rect.w && mouse_y >= highscore_rect.y && mouse_y <= highscore_rect.y + highscore_rect.h)
+                                {running = false; highscore_next = true;}
+                        }
+
+
+                }
+
+
+        SDL_RenderPresent(renderer);
+        }
+
+        while (highscore_next)
+        {
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, back_highscore_text, NULL, &back_highscore_rect);
+            SDL_RenderCopy(renderer, render_highscore_text, NULL, &render_highscore_rect);
+            while(SDL_PollEvent(&e) != 0)
+                {
+                    if (e.type == SDL_QUIT) {highscore_next = false; start = false;};
+                    if (e.type == SDL_MOUSEMOTION)
+                        {
+                            mouse_x, mouse_y;
+                            SDL_GetMouseState(&mouse_x, &mouse_y);
+                        }
+
+                    if (e.type == SDL_MOUSEBUTTONDOWN)
+                        {
+                            if (mouse_x >= back_highscore_rect.x && mouse_x <= back_highscore_rect.x + back_highscore_rect.w && mouse_y >= back_highscore_rect.y && mouse_y <= back_highscore_rect.y + back_highscore_rect.h)
+                                {running = true; highscore_next = false;}
+                        }
+
+
+                }
+            SDL_RenderPresent(renderer);
+        }
+
+    }
+
+
+}
+//------------------------------------------------------------//
+
+/////////////////////-----MAIN--GAME-----///////////////////////
+SDL_Rect rect;
+SDL_Rect pre_rect;
+
+bool game_over = false;
+int n;
+int pre_num;
+
+void colordraw(int& color)
+{
+    if (color == 0) SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255); // light blue
+    if (color == 1) SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);   // red
+    if (color == 2) SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);   // green
+    if (color == 3) SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255); // purple
+    if (color == 4) SDL_SetRenderDrawColor(renderer, 255, 180, 0, 255); // orange
+    if (color == 5) SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);   // blue
+    if (color == 6) SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); // yellow
+}
+
+void draw(SDL_Rect &rect, int& n)
+{
+    colordraw(n);
+    SDL_RenderFillRect(renderer, &rect);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &rect);
+}
+
+
+
+const int M  = 24;
+const int N = 10;
+
+int score_bonus;
+
+int field[M][N] = {0};
+
+int figures[7][4] ={
+    0,2,4,6, // I
+    0,2,3,5, // Z
+    1,3,2,4, // S
+    1,3,2,5, // T
+    0,2,4,5, // L
+    1,3,5,4, // J
+    0,1,2,3, // O
+};
+
+struct point{int x,y;} a[4], b[4], c[4];
+
+Uint32 timer = 0;
+int delay;
+Uint32 starttime = 0;
+
+bool check()
+{
+    for(int i=0;i<4;i++)
+        if (a[i].x<0 || a[i].x >N-1 || a[i].y >M) return 0;
+        else if (field[a[i].y][a[i].x]) return 0;
+    return 1;
+}
+
+int dx;
+bool rotate;
+void drop_and_spawn()
+{
+    timer = SDL_GetTicks() - starttime;
+    if (timer>delay)
+    {
+        for(int i=0;i<4;i++)
+        {
+            b[i] = a[i];
+            a[i].y+=1;
+         };
+         starttime = SDL_GetTicks();
+        timer = SDL_GetTicks() - starttime;
+    };
+
+
+        if (!check())
+        {
+            for(int i=0;i<4;i++) field[b[i].y][b[i].x] = n+1;
+
+            n = pre_num;
+            for (int i=0;i<4;i++)
+            {
+                a[i].x = figures[n][i] % 2 + 5;
+                a[i].y = figures[n][i] / 2;
+            }
+            pre_num = rand() % 7;
+
+        }
+            for (int i=0;i<N;i++)
+                {if (field[0][i] == 0) {continue;}
+                else game_over = true;play_game = false;};
+
+        score_bonus = 0;
+        int k = M - 1;
+        for (int i = M-1 ; i>0; i--)
+        {
+            int counte = 0;
+            for (int j = 0; j<N; j++)
+            {
+                if (field[i][j]) counte++;
+                field[k][j] = field[i][j];
+
+            };
+            if (counte < N)  k--;
+            if (counte == N) score_bonus++;
+
+
+        };
+
+        switch (score_bonus)
+                {
+                    case 1: {score = score + 40; break;}
+                    case 2: {score = score + 100;break;}
+                    case 3: {score = score + 300;break;}
+                    case 4: {score = score + 1200;break;}
+                };
+
+        score_render();
+
+        dx = 0; rotate = false; delay = 700;
+
+
+//        if(!game_over)
+            for(int i=0;i<4;i++)
+        {
+            rect.x = a[i].x * 25;
+            rect.y = a[i].y * 25;
+            draw(rect,n);
+        };
+
+        for(int i =0;i<M;i++)
+            for(int j =0;j<N;j++)
+            {
+                if (field[i][j] == 0) continue;
+                rect.x = j*25;
+                rect.y = i*25;
+                int colornum = field[i][j] - 1;
+                draw(rect,colornum);
+            };
+};
+//---------------------------------------------------//
+
+
+
+//////////////-----RENDER--SCORE-----//////////////////
+SDL_Surface* surfacescore = NULL;
+SDL_Texture* score_text = NULL;
+SDL_Rect score_rect;
+
+SDL_Surface* surfacemark = NULL;
+SDL_Texture* mark = NULL;
+SDL_Rect mark_rect;
+
+SDL_Surface* snext_pieces = NULL;
+SDL_Texture* next_pieces = NULL;
+SDL_Rect next_pieces_rect;
+
+void score_render()
+{
+    surfacescore = TTF_RenderText_Solid(dlx, "Score", white);
+    score_text = SDL_CreateTextureFromSurface(renderer, surfacescore);
+    score_rect = {300,100,surfacescore->w, surfacescore->h};
+    std::string s = std::to_string(score);
+
+    snext_pieces = TTF_RenderText_Solid(dlx,"Next", white);
+    next_pieces = SDL_CreateTextureFromSurface(renderer, snext_pieces);
+    next_pieces_rect = {350,300,snext_pieces->w,snext_pieces->h};
+
+    surfacemark = TTF_RenderText_Solid(dlx,s.c_str(), white);
+    mark = SDL_CreateTextureFromSurface(renderer, surfacemark);
+    mark_rect = {400,170,surfacemark->w,surfacemark->h};
+
+
+}
+
+//---------------------------------------------------//
+
+
+
+//////////////-----GAME--OVER-----////////////////////
+SDL_Surface* game_end_1 = NULL;
+SDL_Texture* game_end_text_1 = NULL;
+SDL_Surface* game_end_2 = NULL;
+SDL_Texture* game_end_text_2 = NULL;
+SDL_Rect game_end_rect_1;
+SDL_Rect game_end_rect_2;
+void game_end_func()
+{
+    game_end_1 = TTF_RenderText_Solid(dlx_60, "Game", white);
+    game_end_2 = TTF_RenderText_Solid(dlx_60, "Over", white);
+    game_end_text_1 = SDL_CreateTextureFromSurface(renderer, game_end_1);
+    game_end_text_2 = SDL_CreateTextureFromSurface(renderer, game_end_2);
+    game_end_rect_1 = {200,100,game_end_1->w,game_end_1->h};
+    game_end_rect_2 = {200,170,game_end_2->w,game_end_2->h};
+
+}
+//---------------------------------------------------//
+
+
+///////////////----PLAY--AGAIN----/////////////////////
+SDL_Surface* press = NULL;
+SDL_Texture* press_space = NULL;
+SDL_Rect press_space_rect;
+
+void play_again()
+{
+    press = TTF_RenderText_Solid(dlx, "Press SPACE to play again", white);
+    press_space = SDL_CreateTextureFromSurface(renderer, press);
+    press_space_rect = {10,500,press->w,press->h};
+    SDL_RenderCopy(renderer, press_space, NULL, &press_space_rect);
+    while(SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT) {game_over = false; playing = false;}
+                if (e.type == SDL_KEYDOWN)
+                {
+                    if(e.key.keysym.sym == SDLK_SPACE)
+                        {
+                            score = 0;
+                            game_over = false; play_game = true;
+                            for (int i=0;i<M;i++)
+                                for (int j=0;j<N;j++)
+                                    field[i][j] = 0;
+                        }
+                }
+            }
+}
+
+//---------------------------------------------------//
+
+
+void close()
+{
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+}
+
+int main(int argc, char* argv[])
+{
+    TTF_Init();
+    dlx = TTF_OpenFont("dlxfont.ttf", 23);
+    dlx_30 = TTF_OpenFont("dlxfont.ttf", 30);
+    dlx_60 = TTF_OpenFont("dlxfont.ttf", 60);
+    dlx_80 = TTF_OpenFont("dlxfont.ttf", 80);
+
+    game_end_func();
+
+
+    f.open("highscore.txt");
+    f>>score_max;
+    f.close();
+
+
+    rect = {0,0,25,25};
+    pre_rect = {0,0,25,25};
+
+    play_game = true;
+
+        srand(time(NULL));
+        n = rand() % 7;
+        pre_num = rand() % 7;
+        for (int i=0;i<4;i++)
+        {
+            a[i].x = figures[n][i] % 2 + 5;
+            a[i].y = figures[n][i] / 2;
+        };
+
+        menu_start_game();
+
+    while (playing)
+    {
+        while (play_game) {
+            SDL_RenderClear(renderer);
+            srand(time(NULL));
+
+            if (!game_over){
+            for (int i=0;i<4;i++)
+            {
+                c[i].x = figures[pre_num][i] % 2 + 16;
+                c[i].y = figures[pre_num][i] / 2 + 16;
+            };
+
+            for(int i=0;i<4;i++)
+            {
+                pre_rect.x = c[i].x * 25;
+                pre_rect.y = c[i].y * 25;
+                draw(pre_rect,pre_num);
+            };};
+
+        while(SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT) {playing = false; play_game = false;}
+                if (e.type == SDL_KEYDOWN)
+                {
+                    if(e.key.keysym.sym == SDLK_LEFT) dx = -1;
+                    if(e.key.keysym.sym == SDLK_RIGHT) dx = 1;
+                    if(e.key.keysym.sym == SDLK_UP) rotate = true;
+                    if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
+                }
+            }
+
+
+        for(int i=0;i<4;i++)
+        {
+            b[i] = a[i];
+            a[i].x += dx;
+        };
+        if (!check()) for (int i=0;i<4;i++) a[i] = b[i];
+
+
+        if (rotate)
+        {
+            if (n != 6){point p = a[1]; // centre point of rotation
+            for(int i=0;i<4;i++)
+            {
+                int x = a[i].y - p.y;
+                int y = a[i].x - p.x;
+                a[i].x = p.x - x;
+                a[i].y = p.y + y;
+            }}
+            if (!check()) for(int i=0;i<4;i++) a[i] = b[i];
+        };
+
+
+
+        drop_and_spawn();
+
+        SDL_RenderCopy(renderer, score_text, NULL, &score_rect);
+        SDL_RenderCopy(renderer, mark, NULL, &mark_rect);
+        SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
+
+
+
+        SDL_RenderPresent(renderer);
+        }
+
+        while (game_over)
+        {
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, game_end_text_1, NULL, &game_end_rect_1);
+            SDL_RenderCopy(renderer, game_end_text_2, NULL, &game_end_rect_2);
+            play_again();
+            SDL_RenderPresent(renderer);
+        }
+
+    }
+
+    close;
+    return 0;
+
+
+
+}
+
