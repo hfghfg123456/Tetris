@@ -7,6 +7,8 @@ Logic game:
 -------------------------------------------------------------------------------------------
 
 Version:
+1.0.1: 	- Have highscore
+	- Add function play again
 
 1.0.0: 	- Complete logic game
 	- have a basic start menu
@@ -16,7 +18,7 @@ Version:
 
 In the future:
 
-	- add more function of start menu such as: highscore, level,...
+	- add more function of start menu such as: level,...
 	- decorate the game to make game more colorful
 	- and more ...
 
