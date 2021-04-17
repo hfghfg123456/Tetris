@@ -223,6 +223,7 @@ bool check()
 }
 
 int dx;
+int line = 0;
 bool rotate;
 void drop_and_spawn()
 {
@@ -268,7 +269,7 @@ void drop_and_spawn()
 
             };
             if (counte < N-1)  k--;
-            if (counte == N-1) score_bonus++;
+            if (counte == N-1) {score_bonus++; line++; cout<<line;};
 
 
         };
@@ -284,6 +285,8 @@ void drop_and_spawn()
         score_render();
 
         dx = 0; rotate = false; delay = 700;
+        if (line<10) delay = 700;
+        if (10<= line && )
 
 
 //        if(!game_over)
@@ -381,7 +384,7 @@ void play_again()
                 {
                     if(e.key.keysym.sym == SDLK_SPACE)
                         {
-                            score = 0;
+                            score = 0; line = 0;
                             game_over = false; play_game = true;
                             for (int i=0;i<M;i++)
                                 for (int j=0;j<N;j++)
@@ -463,6 +466,7 @@ int main(int argc, char* argv[])
                     if(e.key.keysym.sym == SDLK_UP) rotate = true;
                     if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
                 }
+
             }
 
 
