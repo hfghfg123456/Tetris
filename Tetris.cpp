@@ -8,7 +8,7 @@
 
 using namespace std;
 
-SDL_Window* window = SDL_CreateWindow("GAME KILL TIME. DON'T PLAY!!!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, 600, 600, SDL_WINDOW_SHOWN);
+SDL_Window* window = SDL_CreateWindow("GAME KILL TIME. DON'T PLAY!!!", SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED, 600, 650, SDL_WINDOW_SHOWN);
 SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED|SDL_RENDERER_PRESENTVSYNC);
 TTF_Font* dlx = NULL;
 TTF_Font* dlx_30 = NULL;
@@ -93,7 +93,7 @@ void menu_start_game()
     back_highscore_rect = {250,550,back_highscore->w,back_highscore->h};
 
     std::string data = std::to_string(score_max);
-    render_highscore = TTF_RenderText_Solid(dlx_30,data.c_str(), white);
+    render_highscore = TTF_RenderText_Solid(dlx_60,data.c_str(), white);
     render_highscore_text = SDL_CreateTextureFromSurface(renderer, render_highscore);
     render_highscore_rect = {250,200,render_highscore->w,render_highscore->h};
 
@@ -195,7 +195,7 @@ void draw(SDL_Rect &rect, int& n)
 
 
 
-const int M  = 24;
+const int M  = 25;
 const int N = 11;
 
 int score_bonus;
@@ -221,7 +221,7 @@ Uint32 starttime = 0;
 bool check()
 {
     for(int i=0;i<4;i++)
-        if (a[i].x<1 || a[i].x >N-1 || a[i].y >M) return 0;
+        if (a[i].x<1 || a[i].x >N-1 || a[i].y >M-1) return 0;
         else if (field[a[i].y][a[i].x]) return 0;
     return 1;
 }
@@ -252,14 +252,17 @@ void drop_and_spawn()
             for (int i=0;i<4;i++)
             {
                 a[i].x = figures[n][i] % 2 + 5;
-                a[i].y = figures[n][i] / 2;
+                a[i].y = figures[n][i] / 2 + 1;
             }
             pre_num = rand() % 7;
 
         }
-            for (int i=0;i<N;i++)
-                {if (field[0][i] == 0) {continue;}
-                else game_over = true;play_game = false;};
+
+        //-check-game-over-//
+        for (int i=0;i<N;i++)
+            {if (field[1][i] == 0) {continue;}
+            else game_over = true;play_game = false;};
+        //-----------------//
 
         score_bonus = 0;
         int k = M - 1;
@@ -288,9 +291,13 @@ void drop_and_spawn()
 
         score_render();
 
-        dx = 0; rotate = false; delay = 700;
-//        if (line<10) delay = 700;
-//        if (10<= line && )
+        dx = 0; rotate = false;
+
+        if (line<=1) {delay = 700;}
+            else if(line<=2) {delay = 600;}
+            else if(line<=3) {delay = 500;}
+            else {delay = 400;}
+
 
 
 //        if(!game_over)
@@ -316,6 +323,15 @@ void drop_and_spawn()
 
 
 //////////////-----RENDER--SCORE-----//////////////////
+
+SDL_Surface* highscore_in_game = NULL;
+SDL_Texture* highscore_text_in = NULL;
+SDL_Rect highscore_in_rect;
+
+SDL_Surface* in_high = NULL;
+SDL_Texture* in_high_text = NULL;
+SDL_Rect highscore_ingame;
+
 SDL_Surface* surfacescore = NULL;
 SDL_Texture* score_text = NULL;
 SDL_Rect score_rect;
@@ -328,20 +344,37 @@ SDL_Surface* snext_pieces = NULL;
 SDL_Texture* next_pieces = NULL;
 SDL_Rect next_pieces_rect;
 
+SDL_Surface* s_level = NULL;
+SDL_Texture* level = NULL;
+SDL_Rect level_rect;
+
 void score_render()
 {
+    highscore_in_game = TTF_RenderText_Solid(dlx,"Highscore", white);
+    highscore_text_in = SDL_CreateTextureFromSurface(renderer, highscore_in_game);
+    highscore_in_rect = {353,25,200,highscore_in_game->h};
+
+    std::string max_in = std::to_string(score_max);
+    in_high = TTF_RenderText_Solid(dlx, max_in.c_str(), white);
+    in_high_text = SDL_CreateTextureFromSurface(renderer, in_high);
+    highscore_ingame = {550-in_high->w,75,in_high->w,in_high->h};
+
     surfacescore = TTF_RenderText_Solid(dlx, "Score", white);
     score_text = SDL_CreateTextureFromSurface(renderer, surfacescore);
-    score_rect = {395,37,surfacescore->w, surfacescore->h};
+    score_rect = {395,150,surfacescore->w, surfacescore->h};
+
     std::string s = std::to_string(score);
+    surfacemark = TTF_RenderText_Solid(dlx,s.c_str(), white);
+    mark = SDL_CreateTextureFromSurface(renderer, surfacemark);
+    mark_rect = {550-surfacemark->w,200,surfacemark->w,surfacemark->h};
+
+    s_level = TTF_RenderText_Solid(dlx,"Level", white);
+    level = SDL_CreateTextureFromSurface(renderer, s_level);
+    level_rect = {395,275,s_level->w,s_level->h};
 
     snext_pieces = TTF_RenderText_Solid(dlx,"Next", white);
     next_pieces = SDL_CreateTextureFromSurface(renderer, snext_pieces);
-    next_pieces_rect = {412,325,snext_pieces->w,snext_pieces->h};
-
-    surfacemark = TTF_RenderText_Solid(dlx,s.c_str(), white);
-    mark = SDL_CreateTextureFromSurface(renderer, surfacemark);
-    mark_rect = {550-surfacemark->w,85,surfacemark->w,surfacemark->h};
+    next_pieces_rect = {412,400,snext_pieces->w,snext_pieces->h};
 
 
 }
@@ -450,7 +483,7 @@ int main(int argc, char* argv[])
             for (int i=0;i<4;i++)
             {
                 c[i].x = figures[pre_num][i] % 2 + 17;
-                c[i].y = figures[pre_num][i] / 2 + 17;
+                c[i].y = figures[pre_num][i] / 2 + 19;
             };
 
             for(int i=0;i<4;i++)
@@ -463,6 +496,7 @@ int main(int argc, char* argv[])
         while(SDL_PollEvent(&e) != 0)
             {
                 if (e.type == SDL_QUIT) {playing = false; play_game = false;}
+
                 if (e.type == SDL_KEYDOWN)
                 {
                     if(e.key.keysym.sym == SDLK_LEFT) dx = -1;
@@ -499,11 +533,18 @@ int main(int argc, char* argv[])
 
         drop_and_spawn();
 
+        if (score_max < score) {score_max = score;};
+
         SDL_RenderCopy(renderer, back_ground, NULL, NULL);
+        SDL_RenderCopy(renderer, highscore_text_in, NULL, &highscore_in_rect);
+        SDL_RenderCopy(renderer, in_high_text, NULL, &highscore_ingame);
         SDL_RenderCopy(renderer, score_text, NULL, &score_rect);
         SDL_RenderCopy(renderer, mark, NULL, &mark_rect);
+        SDL_RenderCopy(renderer, level,NULL, &level_rect);
         SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
 
+
+        if (score_max < score) {f.open("highscore.txt"); f<<score; f.close();};
 
 
         SDL_RenderPresent(renderer);
