@@ -4,6 +4,7 @@
 #include <SDL_ttf.h>
 #include <string>
 #include <fstream>
+#include <SDL_image.h>
 
 using namespace std;
 
@@ -166,6 +167,9 @@ void menu_start_game()
 SDL_Rect rect;
 SDL_Rect pre_rect;
 
+SDL_Surface *back_ground_s = IMG_Load("map.png");
+SDL_Texture *back_ground = SDL_CreateTextureFromSurface(renderer, back_ground_s);
+
 bool game_over = false;
 int n;
 int pre_num;
@@ -269,7 +273,7 @@ void drop_and_spawn()
 
             };
             if (counte < N-1)  k--;
-            if (counte == N-1) {score_bonus++; line++; cout<<line;};
+            if (counte == N-1) {score_bonus++; line++;};
 
 
         };
@@ -285,8 +289,8 @@ void drop_and_spawn()
         score_render();
 
         dx = 0; rotate = false; delay = 700;
-        if (line<10) delay = 700;
-        if (10<= line && )
+//        if (line<10) delay = 700;
+//        if (10<= line && )
 
 
 //        if(!game_over)
@@ -328,16 +332,16 @@ void score_render()
 {
     surfacescore = TTF_RenderText_Solid(dlx, "Score", white);
     score_text = SDL_CreateTextureFromSurface(renderer, surfacescore);
-    score_rect = {300,100,surfacescore->w, surfacescore->h};
+    score_rect = {395,37,surfacescore->w, surfacescore->h};
     std::string s = std::to_string(score);
 
     snext_pieces = TTF_RenderText_Solid(dlx,"Next", white);
     next_pieces = SDL_CreateTextureFromSurface(renderer, snext_pieces);
-    next_pieces_rect = {350,300,snext_pieces->w,snext_pieces->h};
+    next_pieces_rect = {412,325,snext_pieces->w,snext_pieces->h};
 
     surfacemark = TTF_RenderText_Solid(dlx,s.c_str(), white);
     mark = SDL_CreateTextureFromSurface(renderer, surfacemark);
-    mark_rect = {400,170,surfacemark->w,surfacemark->h};
+    mark_rect = {550-surfacemark->w,85,surfacemark->w,surfacemark->h};
 
 
 }
@@ -445,8 +449,8 @@ int main(int argc, char* argv[])
             if (!game_over){
             for (int i=0;i<4;i++)
             {
-                c[i].x = figures[pre_num][i] % 2 + 16;
-                c[i].y = figures[pre_num][i] / 2 + 16;
+                c[i].x = figures[pre_num][i] % 2 + 17;
+                c[i].y = figures[pre_num][i] / 2 + 17;
             };
 
             for(int i=0;i<4;i++)
@@ -495,6 +499,7 @@ int main(int argc, char* argv[])
 
         drop_and_spawn();
 
+        SDL_RenderCopy(renderer, back_ground, NULL, NULL);
         SDL_RenderCopy(renderer, score_text, NULL, &score_rect);
         SDL_RenderCopy(renderer, mark, NULL, &mark_rect);
         SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
