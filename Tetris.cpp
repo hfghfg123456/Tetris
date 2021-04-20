@@ -449,7 +449,17 @@ void play_again()
 
 void close()
 {
+    TTF_CloseFont(dlx);
+    TTF_CloseFont(dlx_30);
+    TTF_CloseFont(dlx_60);
+    TTF_CloseFont(dlx_80);
     SDL_DestroyTexture(back_ground);
+    SDL_DestroyTexture(score_text);
+    SDL_DestroyTexture(mark);
+    SDL_DestroyTexture(level_class);
+    SDL_DestroyTexture(level);
+    SDL_DestroyTexture(press_space);
+    SDL_DestroyTexture(next_pieces);
     SDL_DestroyTexture(in_high_text);
     SDL_DestroyTexture(highscore_text);
     SDL_DestroyTexture(highscore_text_in);
