@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 using namespace std;
 
@@ -14,6 +15,10 @@ TTF_Font* dlx = NULL;
 TTF_Font* dlx_30 = NULL;
 TTF_Font* dlx_60 = NULL;
 TTF_Font* dlx_80 = NULL;
+
+Mix_Chunk* sound_move = NULL;
+Mix_Chunk* sound_score = NULL;
+Mix_Chunk* drop = NULL;
 
 SDL_Color white = {255,255,255};
 
@@ -50,7 +55,13 @@ SDL_Surface* render_highscore = NULL;
 SDL_Texture* render_highscore_text = NULL;
 SDL_Rect render_highscore_rect;
 
+SDL_Surface* s_start_background = NULL;
+SDL_Texture* start_background = NULL;
+SDL_Rect start_background_rect;
+
 bool play_game = false;
+
+void close();
 
 SDL_Event e;
 
@@ -71,41 +82,43 @@ fstream f;
 void menu_start_game()
 {
 
-//    SDL_RenderClear(renderer);
-    tetris = TTF_RenderText_Solid(dlx_80,"Tetris", white);
-    tetris_text = SDL_CreateTextureFromSurface(renderer, tetris);
-    tetris_rect = {70,50,tetris->w,tetris->h};
+    s_start_background = IMG_Load("start.jpg");
+    start_background = SDL_CreateTextureFromSurface(renderer, s_start_background);
+    back_highscore_rect = {0,0,s_start_background->w,s_start_background->h};
 
     yes = TTF_RenderText_Solid(dlx_30, "Play", white);
     yes_text = SDL_CreateTextureFromSurface(renderer, yes);
-    yes_rect = {250,350,yes->w,yes->h};
+    yes_rect = {240,300,yes->w,yes->h};
 
-    highscore = TTF_RenderText_Solid(dlx_30,"Highscore", white);
-    highscore_text = SDL_CreateTextureFromSurface(renderer, highscore);
-    highscore_rect = {180,450,highscore->w,highscore->h};
-
+//    highscore = TTF_RenderText_Solid(dlx_30,"Highscore", white);
+//    highscore_text = SDL_CreateTextureFromSurface(renderer, highscore);
+//    highscore_rect = {180,450,highscore->w,highscore->h};
+//
     no = TTF_RenderText_Solid(dlx_30, "Exit", white);
     no_text = SDL_CreateTextureFromSurface(renderer, no);
-    no_rect = {250,550,no->w,no->h};
+    no_rect = {240,400,no->w,no->h};
+//
+//    back_highscore = TTF_RenderText_Solid(dlx_30,"Back", white);
+//    back_highscore_text = SDL_CreateTextureFromSurface(renderer, back_highscore);
+//    back_highscore_rect = {250,550,back_highscore->w,back_highscore->h};
+//
+//    std::string data = std::to_string(score_max);
+//    render_highscore = TTF_RenderText_Solid(dlx_60,data.c_str(), white);
+//    render_highscore_text = SDL_CreateTextureFromSurface(renderer, render_highscore);
+//    render_highscore_rect = {(600-render_highscore->w)/2,225,render_highscore->w,render_highscore->h};
 
-    back_highscore = TTF_RenderText_Solid(dlx_30,"Back", white);
-    back_highscore_text = SDL_CreateTextureFromSurface(renderer, back_highscore);
-    back_highscore_rect = {250,550,back_highscore->w,back_highscore->h};
 
-    std::string data = std::to_string(score_max);
-    render_highscore = TTF_RenderText_Solid(dlx_60,data.c_str(), white);
-    render_highscore_text = SDL_CreateTextureFromSurface(renderer, render_highscore);
-    render_highscore_rect = {(600-render_highscore->w)/2,225,render_highscore->w,render_highscore->h};
 
     while (start)
     {
         while (running)
         {
             SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, tetris_text, NULL, &tetris_rect);
+            SDL_RenderCopy(renderer, start_background, NULL, &back_highscore_rect);
             SDL_RenderCopy(renderer, yes_text, NULL, &yes_rect);
             SDL_RenderCopy(renderer, no_text, NULL, &no_rect);
-            SDL_RenderCopy(renderer, highscore_text, NULL, &highscore_rect);
+//            SDL_RenderCopy(renderer, highscore_text, NULL, &highscore_rect);
+
 
 
             while(SDL_PollEvent(&e) != 0)
@@ -231,8 +244,46 @@ bool check()
 int dx;
 int line = 0;
 bool rotate;
+bool music_score = false;
+bool get_drop_music = false;
+
 void drop_and_spawn()
 {
+     while(SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT) {playing = false; play_game = false;}
+                if (e.type == SDL_KEYDOWN)
+                {
+                    if(e.key.keysym.sym == SDLK_LEFT) {dx = -1;Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_RIGHT) {dx = 1;Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_UP) {rotate = true;};
+                    if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
+                }
+
+            }
+
+
+        for(int i=0;i<4;i++)
+        {
+            b[i] = a[i];
+            a[i].x += dx;
+        };
+        if (!check()) for (int i=0;i<4;i++) a[i] = b[i];
+
+
+        if (rotate)
+        {
+            if (n != 6){point p = a[1]; // centre point of rotation
+            for(int i=0;i<4;i++)
+            {
+                int x = a[i].y - p.y;
+                int y = a[i].x - p.x;
+                a[i].x = p.x - x;
+                a[i].y = p.y + y;
+            }}
+            if (!check()) for(int i=0;i<4;i++) a[i] = b[i];
+        };
+
     timer = SDL_GetTicks() - starttime;
     if (timer>delay)
     {
@@ -258,7 +309,11 @@ void drop_and_spawn()
             }
             pre_num = rand() % 7;
 
+
+            get_drop_music = true;
         }
+
+
 
         //-check-game-over-//
         for (int i=0;i<N;i++)
@@ -278,7 +333,7 @@ void drop_and_spawn()
 
             };
             if (counte < N-1)  k--;
-            if (counte == N-1) {score_bonus++; line++;};
+            if (counte == N-1) {score_bonus++; line++;music_score = true;};
 
 
         };
@@ -320,6 +375,13 @@ void drop_and_spawn()
                 int colornum = field[i][j] - 1;
                 draw(rect,colornum);
             };
+
+        if (music_score) {Mix_PlayChannel( -1, sound_score, 0 );};
+
+
+        if (!music_score && get_drop_music) {Mix_PlayChannel( -1, drop, 0 );};
+        get_drop_music = false;
+        music_score = false;
 };
 //---------------------------------------------------//
 
@@ -453,26 +515,41 @@ void close()
     TTF_CloseFont(dlx_30);
     TTF_CloseFont(dlx_60);
     TTF_CloseFont(dlx_80);
-    SDL_DestroyTexture(back_ground);
-    SDL_DestroyTexture(score_text);
-    SDL_DestroyTexture(mark);
-    SDL_DestroyTexture(level_class);
-    SDL_DestroyTexture(level);
-    SDL_DestroyTexture(press_space);
-    SDL_DestroyTexture(next_pieces);
-    SDL_DestroyTexture(in_high_text);
-    SDL_DestroyTexture(highscore_text);
-    SDL_DestroyTexture(highscore_text_in);
-    SDL_DestroyTexture(game_end_text_1);
-    SDL_DestroyTexture(game_end_text_2);
+    Mix_FreeChunk(sound_move);
+    Mix_FreeChunk(sound_score);
+    Mix_FreeChunk(drop);
+    Mix_CloseAudio();
+//    SDL_DestroyTexture(back_ground);
+//    SDL_DestroyTexture(score_text);
+//    SDL_DestroyTexture(mark);
+//    SDL_DestroyTexture(level_class);
+//    SDL_DestroyTexture(level);
+//    SDL_DestroyTexture(press_space);
+//    SDL_DestroyTexture(next_pieces);
+//    SDL_DestroyTexture(in_high_text);
+//    SDL_DestroyTexture(highscore_text);
+//    SDL_DestroyTexture(highscore_text_in);
+//    SDL_DestroyTexture(game_end_text_1);
+//    SDL_DestroyTexture(game_end_text_2);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    IMG_Quit();
 }
 
 int main(int argc, char* argv[])
 {
     TTF_Init();
+
+    if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
+    {
+        cout<<"SDL_mixer could not initialize! SDL_mixer Error: %s\n"<< Mix_GetError();
+    };
+
+    sound_move = Mix_LoadWAV( "move_sound.wav" );
+    sound_score = Mix_LoadWAV( "score_reach.wav" );
+    drop = Mix_LoadWAV("drop.wav");
+
     dlx = TTF_OpenFont("dlxfont.ttf", 23);
     dlx_30 = TTF_OpenFont("dlxfont.ttf", 30);
     dlx_60 = TTF_OpenFont("dlxfont.ttf", 60);
@@ -522,44 +599,8 @@ int main(int argc, char* argv[])
                 draw(pre_rect,pre_num);
             };};
 
-        while(SDL_PollEvent(&e) != 0)
-            {
-                if (e.type == SDL_QUIT) {playing = false; play_game = false;}
-                if (e.type == SDL_KEYDOWN)
-                {
-                    if(e.key.keysym.sym == SDLK_LEFT) dx = -1;
-                    if(e.key.keysym.sym == SDLK_RIGHT) dx = 1;
-                    if(e.key.keysym.sym == SDLK_UP) rotate = true;
-                    if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
-                }
-
-            }
-
-
-        for(int i=0;i<4;i++)
-        {
-            b[i] = a[i];
-            a[i].x += dx;
-        };
-        if (!check()) for (int i=0;i<4;i++) a[i] = b[i];
-
-
-        if (rotate)
-        {
-            if (n != 6){point p = a[1]; // centre point of rotation
-            for(int i=0;i<4;i++)
-            {
-                int x = a[i].y - p.y;
-                int y = a[i].x - p.x;
-                a[i].x = p.x - x;
-                a[i].y = p.y + y;
-            }}
-            if (!check()) for(int i=0;i<4;i++) a[i] = b[i];
-        };
-
-
-
         drop_and_spawn();
+
 
         if (score_max < score) {score_max = score;};
         if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
@@ -590,7 +631,7 @@ int main(int argc, char* argv[])
 
     }
 
-    close;
+    close();
     return 0;
 
 
