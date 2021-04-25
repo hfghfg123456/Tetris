@@ -21,6 +21,15 @@ Mix_Chunk* sound_score = NULL;
 Mix_Chunk* drop = NULL;
 
 SDL_Color white = {255,255,255};
+SDL_Color red = {255, 0, 0, 255};
+SDL_Color cyan = {0, 255, 255, 255};
+SDL_Color green = {0, 255, 0, 255};
+SDL_Color purple = {255, 0, 255, 255};
+SDL_Color orange = {255, 180, 0, 255};
+SDL_Color blue = {0, 0, 255, 255};
+SDL_Color Yellow = {255, 255, 0, 255};
+
+
 
 int score = 0;
 
@@ -86,7 +95,7 @@ void menu_start_game()
     start_background = SDL_CreateTextureFromSurface(renderer, s_start_background);
     back_highscore_rect = {0,0,s_start_background->w,s_start_background->h};
 
-    yes = TTF_RenderText_Solid(dlx_30, "Play", white);
+    yes = TTF_RenderText_Blended(dlx_30,"PLAY",white);
     yes_text = SDL_CreateTextureFromSurface(renderer, yes);
     yes_rect = {240,300,yes->w,yes->h};
 
@@ -94,7 +103,7 @@ void menu_start_game()
 //    highscore_text = SDL_CreateTextureFromSurface(renderer, highscore);
 //    highscore_rect = {180,450,highscore->w,highscore->h};
 //
-    no = TTF_RenderText_Solid(dlx_30, "Exit", white);
+    no = TTF_RenderText_Blended(dlx_30,"EXIT",white);
     no_text = SDL_CreateTextureFromSurface(renderer, no);
     no_rect = {240,400,no->w,no->h};
 //
@@ -114,6 +123,7 @@ void menu_start_game()
         while (running)
         {
             SDL_RenderClear(renderer);
+
             SDL_RenderCopy(renderer, start_background, NULL, &back_highscore_rect);
             SDL_RenderCopy(renderer, yes_text, NULL, &yes_rect);
             SDL_RenderCopy(renderer, no_text, NULL, &no_rect);
@@ -134,8 +144,8 @@ void menu_start_game()
                         {
                             if (mouse_x >= yes_rect.x && mouse_x <= yes_rect.x + yes_rect.w && mouse_y >= yes_rect.y && mouse_y <= yes_rect.y + yes_rect.h) {playing = true; running = false; start = false;}
                             if (mouse_x >= no_rect.x && mouse_x <= no_rect.x + no_rect.w && mouse_y >= no_rect.y && mouse_y <= no_rect.y + no_rect.h) {running = false; start = false;}
-                            if (mouse_x >= highscore_rect.x && mouse_x <= highscore_rect.x + highscore_rect.w && mouse_y >= highscore_rect.y && mouse_y <= highscore_rect.y + highscore_rect.h)
-                                {running = false; highscore_next = true;}
+//                            if (mouse_x >= highscore_rect.x && mouse_x <= highscore_rect.x + highscore_rect.w && mouse_y >= highscore_rect.y && mouse_y <= highscore_rect.y + highscore_rect.h)
+//                                {running = false; highscore_next = true;}
                         }
 
 
@@ -145,30 +155,30 @@ void menu_start_game()
         SDL_RenderPresent(renderer);
         }
 
-        while (highscore_next)
-        {
-            SDL_RenderClear(renderer);
-            SDL_RenderCopy(renderer, back_highscore_text, NULL, &back_highscore_rect);
-            SDL_RenderCopy(renderer, render_highscore_text, NULL, &render_highscore_rect);
-            while(SDL_PollEvent(&e) != 0)
-                {
-                    if (e.type == SDL_QUIT) {highscore_next = false; start = false;};
-                    if (e.type == SDL_MOUSEMOTION)
-                        {
-                            mouse_x, mouse_y;
-                            SDL_GetMouseState(&mouse_x, &mouse_y);
-                        }
-
-                    if (e.type == SDL_MOUSEBUTTONDOWN)
-                        {
-                            if (mouse_x >= back_highscore_rect.x && mouse_x <= back_highscore_rect.x + back_highscore_rect.w && mouse_y >= back_highscore_rect.y && mouse_y <= back_highscore_rect.y + back_highscore_rect.h)
-                                {running = true; highscore_next = false;}
-                        }
-
-
-                }
-            SDL_RenderPresent(renderer);
-        }
+//        while (highscore_next)
+//        {
+//            SDL_RenderClear(renderer);
+//            SDL_RenderCopy(renderer, back_highscore_text, NULL, &back_highscore_rect);
+//            SDL_RenderCopy(renderer, render_highscore_text, NULL, &render_highscore_rect);
+//            while(SDL_PollEvent(&e) != 0)
+//                {
+//                    if (e.type == SDL_QUIT) {highscore_next = false; start = false;};
+//                    if (e.type == SDL_MOUSEMOTION)
+//                        {
+//                            mouse_x, mouse_y;
+//                            SDL_GetMouseState(&mouse_x, &mouse_y);
+//                        }
+//
+//                    if (e.type == SDL_MOUSEBUTTONDOWN)
+//                        {
+//                            if (mouse_x >= back_highscore_rect.x && mouse_x <= back_highscore_rect.x + back_highscore_rect.w && mouse_y >= back_highscore_rect.y && mouse_y <= back_highscore_rect.y + back_highscore_rect.h)
+//                                {running = true; highscore_next = false;}
+//                        }
+//
+//
+//                }
+//            SDL_RenderPresent(renderer);
+//        }
 
     }
 
@@ -229,7 +239,7 @@ int figures[7][4] ={
 
 struct point{int x,y;} a[4], b[4], c[4];
 
-Uint32 timer = 0;
+int timer = 0;
 int delay;
 Uint32 starttime = 0;
 
@@ -249,6 +259,20 @@ bool get_drop_music = false;
 
 void drop_and_spawn()
 {
+     if (!game_over){
+            for (int i=0;i<4;i++)
+            {
+                c[i].x = figures[pre_num][i] % 2 + 17;
+                c[i].y = figures[pre_num][i] / 2 + 19;
+            };
+
+            for(int i=0;i<4;i++)
+            {
+                pre_rect.x = c[i].x * 25;
+                pre_rect.y = c[i].y * 25;
+                draw(pre_rect,pre_num);
+            };};
+
      while(SDL_PollEvent(&e) != 0)
             {
                 if (e.type == SDL_QUIT) {playing = false; play_game = false;}
@@ -285,6 +309,7 @@ void drop_and_spawn()
         };
 
     timer = SDL_GetTicks() - starttime;
+
     if (timer>delay)
     {
         for(int i=0;i<4;i++)
@@ -293,7 +318,7 @@ void drop_and_spawn()
             a[i].y+=1;
          };
          starttime = SDL_GetTicks();
-        timer = SDL_GetTicks() - starttime;
+//        timer = SDL_GetTicks() - starttime;
     };
 
 
@@ -459,21 +484,101 @@ void score_render()
 
 
 //////////////-----GAME--OVER-----////////////////////
-SDL_Surface* game_end_1 = NULL;
-SDL_Texture* game_end_text_1 = NULL;
-SDL_Surface* game_end_2 = NULL;
-SDL_Texture* game_end_text_2 = NULL;
-SDL_Rect game_end_rect_1;
-SDL_Rect game_end_rect_2;
+SDL_Surface* g_end_1 = NULL;
+SDL_Texture* g_end_text_1 = NULL;
+SDL_Rect g_end_rect_1;
+
+SDL_Surface* a_end_1 = NULL;
+SDL_Texture* a_end_text_1 = NULL;
+SDL_Rect a_end_rect_1;
+
+SDL_Surface* m_end_1 = NULL;
+SDL_Texture* m_end_text_1 = NULL;
+SDL_Rect m_end_rect_1;
+
+SDL_Surface* e_end_1 = NULL;
+SDL_Texture* e_end_text_1 = NULL;
+SDL_Rect e_end_rect_1;
+
+SDL_Surface* o_end_2 = NULL;
+SDL_Texture* o_end_text_2 = NULL;
+SDL_Rect o_end_rect_2;
+
+SDL_Surface* v_end_2 = NULL;
+SDL_Texture* v_end_text_2 = NULL;
+SDL_Rect v_end_rect_2;
+
+SDL_Surface* e_end_2 = NULL;
+SDL_Texture* e_end_text_2 = NULL;
+SDL_Rect e_end_rect_2;
+
+SDL_Surface* r_end_2 = NULL;
+SDL_Texture* r_end_text_2 = NULL;
+SDL_Rect r_end_rect_2;
+
+SDL_Surface* s_text = NULL;
+SDL_Texture* text = NULL;
+SDL_Rect text_rect;
+
+SDL_Surface* s_render_score_end = NULL;
+SDL_Texture* render_score_end = NULL;
+SDL_Rect mark_end_rect;
+
 void game_end_func()
 {
-    game_end_1 = TTF_RenderText_Solid(dlx_60, "Game", white);
-    game_end_2 = TTF_RenderText_Solid(dlx_60, "Over", white);
-    game_end_text_1 = SDL_CreateTextureFromSurface(renderer, game_end_1);
-    game_end_text_2 = SDL_CreateTextureFromSurface(renderer, game_end_2);
-    game_end_rect_1 = {200,100,game_end_1->w,game_end_1->h};
-    game_end_rect_2 = {200,170,game_end_2->w,game_end_2->h};
+    g_end_1 = TTF_RenderText_Solid(dlx_60, "G", red);
+    a_end_1 = TTF_RenderText_Solid(dlx_60, "a", cyan);
+    m_end_1 = TTF_RenderText_Solid(dlx_60, "m", purple);
+    e_end_1 = TTF_RenderText_Solid(dlx_60, "e", orange);
 
+    g_end_text_1 = SDL_CreateTextureFromSurface(renderer,g_end_1);
+    a_end_text_1 = SDL_CreateTextureFromSurface(renderer,a_end_1);
+    m_end_text_1 = SDL_CreateTextureFromSurface(renderer,m_end_1);
+    e_end_text_1 = SDL_CreateTextureFromSurface(renderer,e_end_1);
+
+    g_end_rect_1 = {200,110,g_end_1->w,g_end_1->h};
+    a_end_rect_1 = {260,110,a_end_1->w,a_end_1->h};
+    m_end_rect_1 = {320,110,m_end_1->w,m_end_1->h};
+    e_end_rect_1 = {380,110,e_end_1->w,e_end_1->h};
+
+    o_end_2 = TTF_RenderText_Solid(dlx_60,"O",orange);
+    v_end_2 = TTF_RenderText_Solid(dlx_60,"v",Yellow);
+    e_end_2 = TTF_RenderText_Solid(dlx_60,"e",green);
+    r_end_2 = TTF_RenderText_Solid(dlx_60,"r",red);
+
+    o_end_text_2 = SDL_CreateTextureFromSurface(renderer,o_end_2);
+    v_end_text_2 = SDL_CreateTextureFromSurface(renderer,v_end_2);
+    e_end_text_2 = SDL_CreateTextureFromSurface(renderer,e_end_2);
+    r_end_text_2 = SDL_CreateTextureFromSurface(renderer,r_end_2);
+
+    o_end_rect_2 = {200,170,o_end_2->w,o_end_2->h};
+    v_end_rect_2 = {260,170,v_end_2->w,v_end_2->h};
+    e_end_rect_2 = {320,170,e_end_2->w,e_end_2->h};
+    r_end_rect_2 = {380,170,r_end_2->w,r_end_2->h};
+
+    s_text = TTF_RenderText_Solid(dlx_30, "Your score", red);
+    text = SDL_CreateTextureFromSurface(renderer,s_text);
+    text_rect = {160,300,s_text->w,s_text->h};
+
+    std::string a = std::to_string(score);
+    s_render_score_end = TTF_RenderText_Solid(dlx_30,a.c_str(),white);
+    render_score_end = SDL_CreateTextureFromSurface(renderer, s_render_score_end);
+    mark_end_rect = {(600-s_render_score_end->w)/2,360,s_render_score_end->w,s_render_score_end->h};
+}
+
+void game_end_func_render()
+{
+            SDL_RenderCopy(renderer,g_end_text_1,NULL,&g_end_rect_1);
+            SDL_RenderCopy(renderer,a_end_text_1,NULL,&a_end_rect_1);
+            SDL_RenderCopy(renderer,m_end_text_1,NULL,&m_end_rect_1);
+            SDL_RenderCopy(renderer,e_end_text_1,NULL,&e_end_rect_1);
+            SDL_RenderCopy(renderer,o_end_text_2,NULL,&o_end_rect_2);
+            SDL_RenderCopy(renderer,v_end_text_2,NULL,&v_end_rect_2);
+            SDL_RenderCopy(renderer,e_end_text_2,NULL,&e_end_rect_2);
+            SDL_RenderCopy(renderer,r_end_text_2,NULL,&r_end_rect_2);
+
+            SDL_RenderCopy(renderer, render_score_end, NULL, &mark_end_rect);
+            SDL_RenderCopy(renderer, text, NULL, &text_rect);
 }
 //---------------------------------------------------//
 
@@ -533,8 +638,10 @@ void close()
 //    SDL_DestroyTexture(game_end_text_2);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    SDL_Quit();
     IMG_Quit();
+    TTF_Quit();
+    SDL_Quit();
+
 }
 
 int main(int argc, char* argv[])
@@ -585,22 +692,6 @@ int main(int argc, char* argv[])
             SDL_RenderClear(renderer);
             srand(time(NULL));
 
-            if (!game_over){
-            for (int i=0;i<4;i++)
-            {
-                c[i].x = figures[pre_num][i] % 2 + 17;
-                c[i].y = figures[pre_num][i] / 2 + 19;
-            };
-
-            for(int i=0;i<4;i++)
-            {
-                pre_rect.x = c[i].x * 25;
-                pre_rect.y = c[i].y * 25;
-                draw(pre_rect,pre_num);
-            };};
-
-        drop_and_spawn();
-
 
         if (score_max < score) {score_max = score;};
         if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
@@ -614,17 +705,18 @@ int main(int argc, char* argv[])
         SDL_RenderCopy(renderer, level_class, NULL, &level_class_rect);
         SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
 
-
+        drop_and_spawn();
 
         SDL_RenderPresent(renderer);
         }
+
+        game_end_func();
 
         while (game_over)
         {
             SDL_RenderClear(renderer);
             if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
-            SDL_RenderCopy(renderer, game_end_text_1, NULL, &game_end_rect_1);
-            SDL_RenderCopy(renderer, game_end_text_2, NULL, &game_end_rect_2);
+            game_end_func_render();
             play_again();
             SDL_RenderPresent(renderer);
         }
