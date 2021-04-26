@@ -671,6 +671,7 @@ void close()
 {
     renderer = NULL;
     window = NULL;
+    starttime = 0;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
