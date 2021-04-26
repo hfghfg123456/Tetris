@@ -29,44 +29,64 @@ SDL_Color orange = {255, 180, 0, 255};
 SDL_Color blue = {0, 0, 255, 255};
 SDL_Color Yellow = {255, 255, 0, 255};
 
+SDL_Texture* loadIMG(std::string path)
+{
 
+	SDL_Texture* newTexture = NULL;
+
+	SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+
+    newTexture = SDL_CreateTextureFromSurface( renderer, loadedSurface );
+
+    SDL_FreeSurface( loadedSurface );
+
+	return newTexture;
+}
+
+SDL_Texture* loadText(TTF_Font* font, std::string text, SDL_Color color)
+{
+    SDL_Surface* loadedSurface = TTF_RenderText_Solid(font, text.c_str(), color);
+
+    SDL_Texture* newTeture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
+
+    SDL_FreeSurface(loadedSurface);
+
+    return newTeture;
+}
+
+void game_end_func();
+void play_again();
+void game_end_func_render();
+void play_again_render();
 
 int score = 0;
 
 void score_render();
 
 //////////////------MENU-WHEN-OPEN-GAME-----////////////////////
-SDL_Surface* tetris = NULL;
-SDL_Texture* tetris_text = NULL;
-SDL_Rect tetris_rect;
 
-SDL_Surface* wanna_join = NULL;
 SDL_Texture* wanna_join_text = NULL;
 SDL_Rect wanna_join_rect;
 
-SDL_Surface* yes = NULL;
 SDL_Texture* yes_text = NULL;
 SDL_Rect yes_rect;
 
-SDL_Surface* no = NULL;
 SDL_Texture* no_text = NULL;
 SDL_Rect no_rect;
 
-SDL_Surface* highscore = NULL;
-SDL_Texture* highscore_text = NULL;
-SDL_Rect highscore_rect;
+//SDL_Surface* highscore = NULL;
+//SDL_Texture* highscore_text = NULL;
+//SDL_Rect highscore_rect;
 
-SDL_Surface* back_highscore = NULL;
-SDL_Texture* back_highscore_text = NULL;
-SDL_Rect back_highscore_rect;
+//SDL_Surface* back_highscore = NULL;
+//SDL_Texture* back_highscore_text = NULL;
+//SDL_Rect back_highscore_rect;
 
-SDL_Surface* render_highscore = NULL;
-SDL_Texture* render_highscore_text = NULL;
-SDL_Rect render_highscore_rect;
+//SDL_Surface* render_highscore = NULL;
+//SDL_Texture* render_highscore_text = NULL;
+//SDL_Rect render_highscore_rect;
 
-SDL_Surface* s_start_background = NULL;
 SDL_Texture* start_background = NULL;
-SDL_Rect start_background_rect;
 
 bool play_game = false;
 
@@ -91,21 +111,17 @@ fstream f;
 void menu_start_game()
 {
 
-    s_start_background = IMG_Load("start.jpg");
-    start_background = SDL_CreateTextureFromSurface(renderer, s_start_background);
-    back_highscore_rect = {0,0,s_start_background->w,s_start_background->h};
+    start_background = loadIMG("start.jpg");
 
-    yes = TTF_RenderText_Blended(dlx_30,"PLAY",white);
-    yes_text = SDL_CreateTextureFromSurface(renderer, yes);
-    yes_rect = {240,300,yes->w,yes->h};
+    yes_text = loadText(dlx_30,"PLAY",white);
+    yes_rect = {240,320,120,30};
 
 //    highscore = TTF_RenderText_Solid(dlx_30,"Highscore", white);
 //    highscore_text = SDL_CreateTextureFromSurface(renderer, highscore);
 //    highscore_rect = {180,450,highscore->w,highscore->h};
 //
-    no = TTF_RenderText_Blended(dlx_30,"EXIT",white);
-    no_text = SDL_CreateTextureFromSurface(renderer, no);
-    no_rect = {240,400,no->w,no->h};
+    no_text = loadText(dlx_30,"EXIT",white);
+    no_rect = {240,400,120,30};
 //
 //    back_highscore = TTF_RenderText_Solid(dlx_30,"Back", white);
 //    back_highscore_text = SDL_CreateTextureFromSurface(renderer, back_highscore);
@@ -124,7 +140,7 @@ void menu_start_game()
         {
             SDL_RenderClear(renderer);
 
-            SDL_RenderCopy(renderer, start_background, NULL, &back_highscore_rect);
+            SDL_RenderCopy(renderer, start_background, NULL, NULL);
             SDL_RenderCopy(renderer, yes_text, NULL, &yes_rect);
             SDL_RenderCopy(renderer, no_text, NULL, &no_rect);
 //            SDL_RenderCopy(renderer, highscore_text, NULL, &highscore_rect);
@@ -190,12 +206,38 @@ void menu_start_game()
 SDL_Rect rect;
 SDL_Rect pre_rect;
 
-SDL_Surface *back_ground_s = IMG_Load("map.png");
-SDL_Texture *back_ground = SDL_CreateTextureFromSurface(renderer, back_ground_s);
+
 
 bool game_over = false;
 int n;
 int pre_num;
+
+SDL_Texture *back_ground = loadIMG("map.png");
+
+SDL_Texture* highscore_text_in = NULL;
+SDL_Rect highscore_in_rect;
+
+SDL_Surface* in_high = NULL;
+SDL_Texture* in_high_text = NULL;
+SDL_Rect highscore_ingame;
+
+SDL_Texture* score_text = NULL;
+SDL_Rect score_rect;
+
+SDL_Surface* surfacemark = NULL;
+SDL_Texture* mark = NULL;
+SDL_Rect mark_rect;
+
+SDL_Texture* next_pieces = NULL;
+SDL_Rect next_pieces_rect;
+
+SDL_Texture* level = NULL;
+SDL_Rect level_rect;
+
+SDL_Surface* s_level_class = NULL;
+SDL_Texture* level_class = NULL;
+SDL_Rect level_class_rect;
+
 
 std::string class_level = "D";
 
@@ -257,9 +299,40 @@ bool rotate;
 bool music_score = false;
 bool get_drop_music = false;
 
-void drop_and_spawn()
+void main_game()
 {
-     if (!game_over){
+    while (playing)
+        {
+            while (play_game) {
+                SDL_RenderClear(renderer);
+                srand(time(NULL));
+
+                if (score_max < score) {score_max = score;};
+                if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
+
+     while(SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT)
+                    {
+                        playing = false;
+                        play_game = false;
+//                        for (int i=0;i<M;i++)
+//                            for (int j=0;j<N;j++)
+//                                field[i][j] = 0;
+                    }
+                if (e.type == SDL_KEYDOWN)
+                {
+                    if(e.key.keysym.sym == SDLK_LEFT) {dx = -1;Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_RIGHT) {dx = 1;Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_UP) {rotate = true;};
+                    if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
+                }
+
+            }
+
+
+        if (playing) {
+            if (!game_over ){
             for (int i=0;i<4;i++)
             {
                 c[i].x = figures[pre_num][i] % 2 + 17;
@@ -272,22 +345,7 @@ void drop_and_spawn()
                 pre_rect.y = c[i].y * 25;
                 draw(pre_rect,pre_num);
             };};
-
-     while(SDL_PollEvent(&e) != 0)
-            {
-                if (e.type == SDL_QUIT) {playing = false; play_game = false;}
-                if (e.type == SDL_KEYDOWN)
-                {
-                    if(e.key.keysym.sym == SDLK_LEFT) {dx = -1;Mix_PlayChannel( -1, sound_move, 0 );};
-                    if(e.key.keysym.sym == SDLK_RIGHT) {dx = 1;Mix_PlayChannel( -1, sound_move, 0 );};
-                    if(e.key.keysym.sym == SDLK_UP) {rotate = true;};
-                    if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
-                }
-
-            }
-
-
-        for(int i=0;i<4;i++)
+            for(int i=0;i<4;i++)
         {
             b[i] = a[i];
             a[i].x += dx;
@@ -407,74 +465,65 @@ void drop_and_spawn()
         if (!music_score && get_drop_music) {Mix_PlayChannel( -1, drop, 0 );};
         get_drop_music = false;
         music_score = false;
-};
+
+        SDL_RenderCopy(renderer, back_ground, NULL, NULL);
+        SDL_RenderCopy(renderer, highscore_text_in, NULL, &highscore_in_rect);
+        SDL_RenderCopy(renderer, in_high_text, NULL, &highscore_ingame);
+        SDL_RenderCopy(renderer, score_text, NULL, &score_rect);
+        SDL_RenderCopy(renderer, mark, NULL, &mark_rect);
+        SDL_RenderCopy(renderer, level, NULL, &level_rect);
+        SDL_RenderCopy(renderer, level_class, NULL, &level_class_rect);
+        SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
+        SDL_RenderPresent(renderer);
+        }
+
+        if (game_over && playing) {game_end_func();play_again();};
+
+
+        while (game_over && playing)
+        {
+            SDL_RenderClear(renderer);
+            if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
+            game_end_func_render();
+            play_again_render();
+            SDL_RenderPresent(renderer);
+        }
+
+    }
+}}
 //---------------------------------------------------//
 
 
 
 //////////////-----RENDER--SCORE-----//////////////////
 
-SDL_Surface* highscore_in_game = NULL;
-SDL_Texture* highscore_text_in = NULL;
-SDL_Rect highscore_in_rect;
-
-SDL_Surface* in_high = NULL;
-SDL_Texture* in_high_text = NULL;
-SDL_Rect highscore_ingame;
-
-SDL_Surface* surfacescore = NULL;
-SDL_Texture* score_text = NULL;
-SDL_Rect score_rect;
-
-SDL_Surface* surfacemark = NULL;
-SDL_Texture* mark = NULL;
-SDL_Rect mark_rect;
-
-SDL_Surface* snext_pieces = NULL;
-SDL_Texture* next_pieces = NULL;
-SDL_Rect next_pieces_rect;
-
-SDL_Surface* s_level = NULL;
-SDL_Texture* level = NULL;
-SDL_Rect level_rect;
-
-SDL_Surface* s_level_class = NULL;
-SDL_Texture* level_class = NULL;
-SDL_Rect level_class_rect;
-
-
-
 void score_render()
 {
-    highscore_in_game = TTF_RenderText_Solid(dlx,"Highscore", white);
-    highscore_text_in = SDL_CreateTextureFromSurface(renderer, highscore_in_game);
-    highscore_in_rect = {353,25,200,highscore_in_game->h};
+    highscore_text_in = loadText(dlx,"highscore",white);
+    highscore_in_rect = {353,25,200,25};
 
     std::string max_in = std::to_string(score_max);
     in_high = TTF_RenderText_Solid(dlx, max_in.c_str(), white);
     in_high_text = SDL_CreateTextureFromSurface(renderer, in_high);
     highscore_ingame = {550-in_high->w,75,in_high->w,in_high->h};
 
-    surfacescore = TTF_RenderText_Solid(dlx, "Score", white);
-    score_text = SDL_CreateTextureFromSurface(renderer, surfacescore);
-    score_rect = {395,150,surfacescore->w, surfacescore->h};
+    score_text = loadText(dlx,"score",white);
+    score_rect = {390,150,125,25};
 
     std::string s = std::to_string(score);
     surfacemark = TTF_RenderText_Solid(dlx,s.c_str(), white);
     mark = SDL_CreateTextureFromSurface(renderer, surfacemark);
     mark_rect = {550-surfacemark->w,200,surfacemark->w,surfacemark->h};
 
-    s_level = TTF_RenderText_Solid(dlx,"Level", white);
-    level = SDL_CreateTextureFromSurface(renderer, s_level);
-    level_rect = {395,275,s_level->w,s_level->h};
+    level = loadText(dlx,"level",white);
+    level_rect = {390,275,125,25};
 
     s_level_class = TTF_RenderText_Solid(dlx,class_level.c_str(),white);
     level_class = SDL_CreateTextureFromSurface(renderer, s_level_class);
     level_class_rect = {525,325,s_level_class->w,s_level_class->h};
 
-    snext_pieces = TTF_RenderText_Solid(dlx,"Next", white);
-    next_pieces = SDL_CreateTextureFromSurface(renderer, snext_pieces);
-    next_pieces_rect = {412,400,snext_pieces->w,snext_pieces->h};
+    next_pieces = loadText(dlx,"next",white);
+    next_pieces_rect = {407,400,100,25};
 
 
 }
@@ -584,15 +633,17 @@ void game_end_func_render()
 
 
 ///////////////----PLAY--AGAIN----/////////////////////
-SDL_Surface* press = NULL;
 SDL_Texture* press_space = NULL;
 SDL_Rect press_space_rect;
 
 void play_again()
 {
-    press = TTF_RenderText_Solid(dlx, "Press SPACE to play again", white);
-    press_space = SDL_CreateTextureFromSurface(renderer, press);
-    press_space_rect = {10,500,press->w,press->h};
+    press_space = loadText(dlx,"Press SPACE to play again",white);
+    press_space_rect = {10,500,590,25};
+}
+
+void play_again_render()
+{
     SDL_RenderCopy(renderer, press_space, NULL, &press_space_rect);
     while(SDL_PollEvent(&e) != 0)
             {
@@ -611,31 +662,15 @@ void play_again()
             }
 }
 
+
+
 //---------------------------------------------------//
 
 
 void close()
 {
-    TTF_CloseFont(dlx);
-    TTF_CloseFont(dlx_30);
-    TTF_CloseFont(dlx_60);
-    TTF_CloseFont(dlx_80);
-    Mix_FreeChunk(sound_move);
-    Mix_FreeChunk(sound_score);
-    Mix_FreeChunk(drop);
-    Mix_CloseAudio();
-//    SDL_DestroyTexture(back_ground);
-//    SDL_DestroyTexture(score_text);
-//    SDL_DestroyTexture(mark);
-//    SDL_DestroyTexture(level_class);
-//    SDL_DestroyTexture(level);
-//    SDL_DestroyTexture(press_space);
-//    SDL_DestroyTexture(next_pieces);
-//    SDL_DestroyTexture(in_high_text);
-//    SDL_DestroyTexture(highscore_text);
-//    SDL_DestroyTexture(highscore_text_in);
-//    SDL_DestroyTexture(game_end_text_1);
-//    SDL_DestroyTexture(game_end_text_2);
+    renderer = NULL;
+    window = NULL;
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
@@ -662,8 +697,6 @@ int main(int argc, char* argv[])
     dlx_60 = TTF_OpenFont("dlxfont.ttf", 60);
     dlx_80 = TTF_OpenFont("dlxfont.ttf", 80);
 
-    game_end_func();
-
 
     f.open("highscore.txt");
     f>>score_max;
@@ -686,42 +719,10 @@ int main(int argc, char* argv[])
 
         menu_start_game();
 
-    while (playing)
-    {
-        while (play_game) {
-            SDL_RenderClear(renderer);
-            srand(time(NULL));
+
+        main_game();
 
 
-        if (score_max < score) {score_max = score;};
-        if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
-
-        SDL_RenderCopy(renderer, back_ground, NULL, NULL);
-        SDL_RenderCopy(renderer, highscore_text_in, NULL, &highscore_in_rect);
-        SDL_RenderCopy(renderer, in_high_text, NULL, &highscore_ingame);
-        SDL_RenderCopy(renderer, score_text, NULL, &score_rect);
-        SDL_RenderCopy(renderer, mark, NULL, &mark_rect);
-        SDL_RenderCopy(renderer, level, NULL, &level_rect);
-        SDL_RenderCopy(renderer, level_class, NULL, &level_class_rect);
-        SDL_RenderCopy(renderer, next_pieces, NULL, &next_pieces_rect);
-
-        drop_and_spawn();
-
-        SDL_RenderPresent(renderer);
-        }
-
-        game_end_func();
-
-        while (game_over)
-        {
-            SDL_RenderClear(renderer);
-            if (score_max <= score) {f.open("highscore.txt"); f<<score; f.close();};
-            game_end_func_render();
-            play_again();
-            SDL_RenderPresent(renderer);
-        }
-
-    }
 
     close();
     return 0;
