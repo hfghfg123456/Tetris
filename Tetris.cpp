@@ -204,6 +204,7 @@ void menu_start_game()
 }
 //------------------------------------------------------------//
 
+
 /////////////////////-----MAIN--GAME-----///////////////////////
 SDL_Rect rect;
 SDL_Rect pre_rect;
@@ -300,6 +301,7 @@ int line = 0;
 bool rotate;
 bool music_score = false;
 bool get_drop_music = false;
+bool sound_open = false;
 
 void main_game()
 {
@@ -325,8 +327,9 @@ void main_game()
                     }
                 if (e.type == SDL_KEYDOWN)
                 {
-                    if(e.key.keysym.sym == SDLK_LEFT) {dx = -1;Mix_PlayChannel( -1, sound_move, 0 );};
-                    if(e.key.keysym.sym == SDLK_RIGHT) {dx = 1;Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_m) sound_open = !sound_open;
+                    if(e.key.keysym.sym == SDLK_LEFT) {dx = -1; if(sound_open) Mix_PlayChannel( -1, sound_move, 0 );};
+                    if(e.key.keysym.sym == SDLK_RIGHT) {dx = 1; if(sound_open) Mix_PlayChannel( -1, sound_move, 0 );};
                     if(e.key.keysym.sym == SDLK_UP) {rotate = true;};
                     if(e.key.keysym.sym == SDLK_DOWN) delay = 10;
                 }
@@ -461,10 +464,10 @@ void main_game()
                 draw(rect,colornum);
             };
 
-        if (music_score) {Mix_PlayChannel( -1, sound_score, 0 );};
+        if (music_score && sound_open) {Mix_PlayChannel( -1, sound_score, 0 );};
 
 
-        if (!music_score && get_drop_music) {Mix_PlayChannel( -1, drop, 0 );};
+        if (!music_score && get_drop_music && sound_open) {Mix_PlayChannel( -1, drop, 0 );};
         get_drop_music = false;
         music_score = false;
 
