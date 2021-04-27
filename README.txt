@@ -4,7 +4,10 @@ Logic game:
 	  When piece drop to bottom of matrix, assign value of piece to matrix. 
 	  When a row is full, delete it and all row above are pushed down.
 playing:
-	- use ← → ↑ ↓ to move your piece to the bottom of board and assign it. after that, new piece is created and put on the top of the 		  board. Reapeat it and if rows is full, they will disapear and all pieces above will drop. More row full in once time, more point 	  you can get. You will have to play again if one of coloum of board has more than 20 blocks.
+	- use ← → ↑ ↓ to move your piece to the bottom of board and assign it. 
+	  After that, new piece is created and put on the top of the board. 
+ 	  Reapeat it and if rows is full, they will disapear and all pieces above will drop. More row full in once time, more point you can get. 
+	  You will have to play again if one of coloum of board has more than 20 blocks.
 -------------------------------------------------------------------------------------------
 
 Version:
