@@ -7,6 +7,10 @@ Logic game:
 -------------------------------------------------------------------------------------------
 
 Version:
+1.0.2: 	- have sound effect
+	- have better background
+	- have level 
+
 1.0.1: 	- Have highscore
 	- Add function play again
 
@@ -18,7 +22,6 @@ Version:
 
 In the future:
 
-	- add more function of start menu such as: level,...
 	- decorate the game to make game more colorful
 	- and more ...
 
