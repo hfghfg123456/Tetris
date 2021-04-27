@@ -29,6 +29,8 @@ SDL_Color orange = {255, 180, 0, 255};
 SDL_Color blue = {0, 0, 255, 255};
 SDL_Color Yellow = {255, 255, 0, 255};
 
+void close();
+
 SDL_Texture* loadIMG(std::string path)
 {
 
@@ -149,7 +151,7 @@ void menu_start_game()
 
             while(SDL_PollEvent(&e) != 0)
                 {
-                    if (e.type == SDL_QUIT) {running = false; start = false;};
+                    if (e.type == SDL_QUIT) {running = false; start = false; close();};
                     if (e.type == SDL_MOUSEMOTION)
                         {
                             mouse_x, mouse_y;
@@ -319,6 +321,7 @@ void main_game()
 //                        for (int i=0;i<M;i++)
 //                            for (int j=0;j<N;j++)
 //                                field[i][j] = 0;
+                        close();
                     }
                 if (e.type == SDL_KEYDOWN)
                 {
@@ -366,8 +369,8 @@ void main_game()
             if (!check()) for(int i=0;i<4;i++) a[i] = b[i];
         };
 
-    timer = SDL_GetTicks() - starttime;
 
+    timer = SDL_GetTicks() - starttime;
     if (timer>delay)
     {
         for(int i=0;i<4;i++)
@@ -376,7 +379,6 @@ void main_game()
             a[i].y+=1;
          };
          starttime = SDL_GetTicks();
-//        timer = SDL_GetTicks() - starttime;
     };
 
 
@@ -533,39 +535,30 @@ void score_render()
 
 
 //////////////-----GAME--OVER-----////////////////////
-SDL_Surface* g_end_1 = NULL;
 SDL_Texture* g_end_text_1 = NULL;
 SDL_Rect g_end_rect_1;
 
-SDL_Surface* a_end_1 = NULL;
 SDL_Texture* a_end_text_1 = NULL;
 SDL_Rect a_end_rect_1;
 
-SDL_Surface* m_end_1 = NULL;
 SDL_Texture* m_end_text_1 = NULL;
 SDL_Rect m_end_rect_1;
 
-SDL_Surface* e_end_1 = NULL;
 SDL_Texture* e_end_text_1 = NULL;
 SDL_Rect e_end_rect_1;
 
-SDL_Surface* o_end_2 = NULL;
 SDL_Texture* o_end_text_2 = NULL;
 SDL_Rect o_end_rect_2;
 
-SDL_Surface* v_end_2 = NULL;
 SDL_Texture* v_end_text_2 = NULL;
 SDL_Rect v_end_rect_2;
 
-SDL_Surface* e_end_2 = NULL;
 SDL_Texture* e_end_text_2 = NULL;
 SDL_Rect e_end_rect_2;
 
-SDL_Surface* r_end_2 = NULL;
 SDL_Texture* r_end_text_2 = NULL;
 SDL_Rect r_end_rect_2;
 
-SDL_Surface* s_text = NULL;
 SDL_Texture* text = NULL;
 SDL_Rect text_rect;
 
@@ -575,42 +568,32 @@ SDL_Rect mark_end_rect;
 
 void game_end_func()
 {
-    g_end_1 = TTF_RenderText_Solid(dlx_60, "G", red);
-    a_end_1 = TTF_RenderText_Solid(dlx_60, "a", cyan);
-    m_end_1 = TTF_RenderText_Solid(dlx_60, "m", purple);
-    e_end_1 = TTF_RenderText_Solid(dlx_60, "e", orange);
 
-    g_end_text_1 = SDL_CreateTextureFromSurface(renderer,g_end_1);
-    a_end_text_1 = SDL_CreateTextureFromSurface(renderer,a_end_1);
-    m_end_text_1 = SDL_CreateTextureFromSurface(renderer,m_end_1);
-    e_end_text_1 = SDL_CreateTextureFromSurface(renderer,e_end_1);
+    g_end_text_1 = loadText(dlx_60,"G",red);
+    a_end_text_1 = loadText(dlx_60,"a",cyan);
+    m_end_text_1 = loadText(dlx_60,"m",purple);
+    e_end_text_1 = loadText(dlx_60,"e",orange);
 
-    g_end_rect_1 = {200,110,g_end_1->w,g_end_1->h};
-    a_end_rect_1 = {260,110,a_end_1->w,a_end_1->h};
-    m_end_rect_1 = {320,110,m_end_1->w,m_end_1->h};
-    e_end_rect_1 = {380,110,e_end_1->w,e_end_1->h};
+    g_end_rect_1 = {200,110,60,60};
+    a_end_rect_1 = {260,110,60,60};
+    m_end_rect_1 = {320,110,60,60};
+    e_end_rect_1 = {380,110,60,60};
 
-    o_end_2 = TTF_RenderText_Solid(dlx_60,"O",orange);
-    v_end_2 = TTF_RenderText_Solid(dlx_60,"v",Yellow);
-    e_end_2 = TTF_RenderText_Solid(dlx_60,"e",green);
-    r_end_2 = TTF_RenderText_Solid(dlx_60,"r",red);
+    o_end_text_2 = loadText(dlx_60,"O",orange);
+    v_end_text_2 = loadText(dlx_60,"v",Yellow);
+    e_end_text_2 = loadText(dlx_60,"e",green);
+    r_end_text_2 = loadText(dlx_60,"r",red);
 
-    o_end_text_2 = SDL_CreateTextureFromSurface(renderer,o_end_2);
-    v_end_text_2 = SDL_CreateTextureFromSurface(renderer,v_end_2);
-    e_end_text_2 = SDL_CreateTextureFromSurface(renderer,e_end_2);
-    r_end_text_2 = SDL_CreateTextureFromSurface(renderer,r_end_2);
+    o_end_rect_2 = {200,170,60,60};
+    v_end_rect_2 = {260,170,60,60};
+    e_end_rect_2 = {320,170,60,60};
+    r_end_rect_2 = {380,170,60,60};
 
-    o_end_rect_2 = {200,170,o_end_2->w,o_end_2->h};
-    v_end_rect_2 = {260,170,v_end_2->w,v_end_2->h};
-    e_end_rect_2 = {320,170,e_end_2->w,e_end_2->h};
-    r_end_rect_2 = {380,170,r_end_2->w,r_end_2->h};
-
-    s_text = TTF_RenderText_Solid(dlx_30, "Your score", red);
-    text = SDL_CreateTextureFromSurface(renderer,s_text);
-    text_rect = {160,300,s_text->w,s_text->h};
+    text = loadText(dlx_30,"Your score", red);
+    text_rect = {160,300,300,30};
 
     std::string a = std::to_string(score);
-    s_render_score_end = TTF_RenderText_Solid(dlx_30,a.c_str(),white);
+    s_render_score_end = TTF_RenderText_Solid(dlx_30,a.c_str(),green);
     render_score_end = SDL_CreateTextureFromSurface(renderer, s_render_score_end);
     mark_end_rect = {(600-s_render_score_end->w)/2,360,s_render_score_end->w,s_render_score_end->h};
 }
@@ -625,7 +608,6 @@ void game_end_func_render()
             SDL_RenderCopy(renderer,v_end_text_2,NULL,&v_end_rect_2);
             SDL_RenderCopy(renderer,e_end_text_2,NULL,&e_end_rect_2);
             SDL_RenderCopy(renderer,r_end_text_2,NULL,&r_end_rect_2);
-
             SDL_RenderCopy(renderer, render_score_end, NULL, &mark_end_rect);
             SDL_RenderCopy(renderer, text, NULL, &text_rect);
 }
@@ -647,7 +629,7 @@ void play_again_render()
     SDL_RenderCopy(renderer, press_space, NULL, &press_space_rect);
     while(SDL_PollEvent(&e) != 0)
             {
-                if (e.type == SDL_QUIT) {game_over = false; playing = false;}
+                if (e.type == SDL_QUIT) {game_over = false; playing = false;close();}
                 if (e.type == SDL_KEYDOWN)
                 {
                     if(e.key.keysym.sym == SDLK_SPACE)
@@ -672,6 +654,8 @@ void close()
     renderer = NULL;
     window = NULL;
     starttime = 0;
+    Mix_FreeChunk(sound_move);
+    Mix_FreeChunk(sound_score);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
@@ -682,16 +666,27 @@ void close()
 
 int main(int argc, char* argv[])
 {
-    TTF_Init();
+    if ( TTF_Init() < 0)
+    {
+        cout<<"SDL_ttf could not initialize! "<<TTF_GetError();
+    };
+
+    if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 )
+    {
+       cout<<"SDL could not initialize! "<<SDL_GetError();
+    };
+
 
     if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 2048 ) < 0 )
     {
-        cout<<"SDL_mixer could not initialize! SDL_mixer Error: %s\n"<< Mix_GetError();
+        cout<<"SDL_mixer could not initialize! "<< Mix_GetError();
     };
+
 
     sound_move = Mix_LoadWAV( "move_sound.wav" );
     sound_score = Mix_LoadWAV( "score_reach.wav" );
     drop = Mix_LoadWAV("drop.wav");
+
 
     dlx = TTF_OpenFont("dlxfont.ttf", 23);
     dlx_30 = TTF_OpenFont("dlxfont.ttf", 30);
@@ -725,7 +720,7 @@ int main(int argc, char* argv[])
 
 
 
-    close();
+//    close();
     return 0;
 
 
