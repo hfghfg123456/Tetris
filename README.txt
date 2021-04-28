@@ -24,11 +24,5 @@ Version:
 
 -------------------------------------------------------------------------------------------
 
-In the future:
 
-	- decorate the game to make game more colorful
-	- and more ...
-
-		
-	
 
